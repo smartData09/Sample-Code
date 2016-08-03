@@ -1,0 +1,44 @@
+   <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" ng-if="data.listOfFailedConstraints[0].code != '1337'">Manager Override Option </h4>
+        <h4 class="modal-title" ng-if="data.listOfFailedConstraints[0].code == '1337'">Unavailable Slot</h4>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-xs-12" ng-if="data.listOfFailedConstraints[0].code != '1337'">
+                <!-- {{data.listOfFailedConstraints}} -->
+                <div>
+                    <p>The following constraints are being violated while setting this appointment: </p>
+                </div>
+                <div>
+                    <ul>
+                        <li ng-repeat="constraint in data.listOfFailedConstraints">{{constraint.constraint}}
+                    </ul>
+                </div>
+                <div ng-if="isEditGrid">
+                    Would you like a manager to approve the appointment?
+                </div>
+                <div  ng-if="isEditGrid"  >
+                    <button class="btn btn-success" ng-click="yes()">Yes</button>
+                    <button class="btn btn-danger" ng-click="no()">No</button>
+                </div>
+                <div ng-if="!isEditGrid">
+                    <p>You don't have permission to book this appointment. Please contact your supervisor.
+                    </p>
+                </div>
+                <div ng-if="!isEditGrid">
+                    <button class="btn btn-success" ng-click="cancel()">Cancel</button>
+                </div>                
+
+            </div>
+            <div class="col-xs-12" ng-if="data.listOfFailedConstraints[0].code == '1337'">
+                <!-- {{data.listOfFailedConstraints}} -->
+                <div>
+                    <p>No Appointments can be booked on this slot currently , please select any other slot for this appointment</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" ng-click="cancel()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>

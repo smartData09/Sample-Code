@@ -1,0 +1,521 @@
+<style type="text/css">
+    .border {border: 0px solid black;}
+    .class-scheduling-padding {padding-left: 12px;}
+</style>
+
+<aside class="right-side">
+    <section class="content-header">
+        <h1> Add Appointments </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+            <li class="active">Patient Sechdule</li>
+        </ol>
+    </section>
+    <section class="content cont_nt1">
+        <div class="row">
+            <div class="form-group col-sm-2">
+                <label>Office*</label>
+                <select class="form-control" data-ng-model="userSelection.office_id" ng-options="obj.title for obj in officeData track by obj._id" ng-change="getOtherDropInfo(userSelection.office_id)">
+                    <option value="">Select Office</option>
+                </select>
+            </div>
+            <div class="form-group col-sm-2">
+                <label>Provider</label>
+                <select class="form-control" data-ng-model="userSelection.providerId" ng-options="obj.firstName+' '+obj.lastName for obj in providerData track by obj._id">
+                    <option value="">Select Provider</option>
+                </select>
+            </div>
+            <div class="form-group col-sm-2">
+                <label>Patient</label><span style="font-size: 8px; vertical-align: super;">(Select from autocomplete)</span>
+                <!--    {{selectedOption}} -->
+                <div ng-disabled="!userSelection.office_id">
+                    <angucomplete-alt id="ex1" placeholder="Select Patient" pause="500" selected-object="patientId" remote-url="/patients/autocomplete" remote-url-request-formatter="remoteUrlRequestFn" remote-url-data-field="items" title-field="concatedName" description-field="mobile_phone_number" minlength="1" input-class="form-control form-control-small">
+                    </angucomplete-alt>
+                </div>
+                <!-- 
+              focus-in="focusIn()"
+              focus-out="focusOut()"
+              selected-object="selected"
+              local-data="names" -->
+                <!-- <select class="form-control" data-ng-model="userSelection.patientId" ng-options="obj.first_name+' '+obj.last_name for obj in patientData track by obj._id" data-ng-change="getTasksEstimatedTime()">
+        <option value="">Select Patient</option>
+        </select> -->
+            </div>
+            <div class="form-group col-sm-2">
+                <label>Diagnosis</label>
+                <select class="form-control" data-ng-model="userSelection.diagId" ng-options="obj.title for obj in diagData track by obj._id" ng-change="getdiagAppt(userSelection.diag_id)">
+                    <option value="">Select Diagnosis</option>
+                </select>
+            </div>
+            <div class="form-group col-sm-2">
+                <label>Appointment Type</label>
+                <select class="form-control" data-ng-model="userSelection.apptTypeId" ng-options="obj.title for obj in apptTypes track by obj._id" data-ng-change="getTasksEstimatedTime()">
+                    <option value="">Select Appointment</option>
+                </select>
+            </div>
+            <div class="form-group col-sm-2">
+                <label>Referer</label><span style="font-size: 8px; vertical-align: super;">(Select from autocomplete)</span>
+                <div ng-disabled="!userSelection.office_id">
+                    <angucomplete-alt id="ex2" placeholder="Select Referer" pause="500" selected-object="refererId" remote-url="/managereferrer/autocomplete" remote-url-request-formatter="remoteUrlRequestFn" remote-url-data-field="items" title-field="concatedName" description-field="email" minlength="1" input-class="form-control form-control-small">
+                    </angucomplete-alt>
+                </div>
+                <!-- <select class="form-control" data-ng-model="userSelection.refererId" ng-options="obj.title for obj in refererData track by obj._id" data-ng-change="getTasksEstimatedTime()" >
+        <option value="">Select Referer</option>
+        </select> -->
+            </div>
+        </div>
+        <div class="row">
+            <!-- checkbox weekd -->
+            <div class="form-group col-md-2">
+                <div class="" style="">
+                    <a role="button" class="btn btn-info" ui-sref="appointment-scheduling-view" style="margin-top: 6%;">View/Edit Appointments</a>
+                </div>
+            </div>
+            <div class="form-group col-md-6  custom-check border">
+
+                <label><b>Preferred appointment days</b></label>
+                <br>
+                <span>
+                    <span ng-repeat = "dayName in daysArray" ng-class="{'class-scheduling-padding' : !$first }" >
+                        <input id="{{dayName}}" type="checkbox" name="{{dayName}}" checklist-model="userSelection.days" checklist-value="dayName" ng-change="checkboxChanged()" >
+                        <label for="{{dayName}}" >  {{dayName}}   </label>
+                    </span>
+                </span>
+            </div>
+            <!-- style="margin-top:15px;" -->
+            <div class="form-group col-md-3  custom-check border">
+                <label>Preferred appointment Time</label>
+                <br>
+                <span ng-repeat="ta in timeArray" class="time-{{ta}}" ng-class="{'class-scheduling-padding' : !$first }" >
+            
+                  <input type="checkbox" id="{{ta}}" name="{{ta}}"  checklist-model="userSelection.timeSelection" checklist-value="ta"  ng-change="checkboxChanged()"  >
+                  <label for="{{ta}}" class="time-{{ta}}" >  {{ta}} </label>
+                  </span>
+            </div>
+        </div>
+        <!--/row-->
+        <div class="row">
+            <div class="col-sm-12 gr-br">
+                <showloader></showloader>
+                <div class="row" ng-show="userSelection.patientId" ng-if="userSelection.office_id && userSelection.diagId && userSelection.apptTypeId && userSelection.providerId">
+                    <div class="patient-tb">
+                        <div class="patient-cv">
+                            <div class="pt-name">
+                                <label>{{ userSelection.patientId.first_name }} &nbsp; {{ userSelection.patientId.middle_name }} &nbsp; {{ userSelection.patientId.last_name }} </label>
+                            </div>
+                            <div class="pt-detail">
+                                <label> {{ userSelection.patientId.merital_status }}</label>
+                                <label></label>
+                            </div>
+                            <div class="clearfix"></div>
+                            <label>{{ userSelection.diag_id.title }}</label>
+                            <div class="table-responsive table-borderd gr-br">
+                                <table class="table table-striped">
+                                    <tr>
+                                        <th width="10%">Action</th>
+                                        <th width="24%" class="tx-cen">Task</th>
+                                        <th width="25%" class="tx-cen">ETA Time(min)</th>
+                                    </tr>
+                                    <tr class="tblscheduling" ng-repeat="task in taskListData">
+                                        <td>
+                                            <button class="btn btn-danger" ng-click="removeTask(task , $index)"><i class="glyphicon glyphicon-minus"></i></button>
+                                        </td>
+                                        <td class="tx-cen">{{task.title}}</td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control etaclass " change-on-blur="taskTimeChanged()" ng-model="task.finalTime" valid-number placeholder="-" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="tx-cen">Total Time</td>
+                                        <td>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control etaclass1" readonly value="{{userSelection.totalTime | number:2 }}" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="tblscheduling1">
+                                        <td align="center" colspan="3">
+                                            <button type="button" data-toggle="modal" ng-click="addTask()" class="btn btn-primary btn-flat bt-ft"><i class="glyphicon glyphicon-plus"></i></button>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <!--       <div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content pop-up">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title">{{ userSelection.diag_id.title }}</h4>
+                </div>
+                <div class="modal-body">
+                  <select class="form-control">
+                    <option>Select Task</option>
+                    <option>Select Task</option>
+                    <option>Select Task</option>
+                    <option>Select Task</option>
+                  </select>
+                </div>
+                <div class="modal-footer">
+                  <button type="button"  ng-click="addTask()" class="btn btn-primary btn-flat">Add Task</button>
+                </div>
+              </div>
+            </div>
+          </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="calendar-cover" id="calendar" select="renderCalender('myCalendar2');">
+                        <div style="margin-bottom:7px ; margin-top:7px" class="row">
+                            <div class="col-sm-6">
+                                <!-- <div class="btn-group">
+                      <button ng-click="changeView('agendaDay', 'myCalendar2')" class="btn btn-success">Day </button>
+                      <button ng-click="changeView('agendaWeek', 'myCalendar2')" class="btn btn-success">Week</button>
+                      <button ng-click="changeView('month', 'myCalendar2')" class="btn btn-success">Month</button>
+          </div> --></div>
+                            <div class="col-md-6" style="text-align:right">
+                                <button ng-click="fetchSchedule()" class="btn btn-primary btn-flat"><i class="glyphicon glyphicon-refresh"></i></button>
+                            </div>
+                        </div>
+                        <div>
+                            <!-- <div class="btn-toolbar">
+            <p class="pull-right lead"></p>
+            <div class="btn-group">
+                <button class="btn btn-success" ng-click="changeView('agendaDay', 'myCalendar2')">Day </button>
+                <button class="btn btn-success" ng-click="changeView('agendaWeek', 'myCalendar2')">Week</button>
+                <button class="btn btn-success" ng-click="changeView('month', 'myCalendar2')">Month</button>
+            </div>
+          </div> -->
+                            <div ui-calendar="uiConfig.calendar" config="uiConfig.calendar" class="calendar" calendar="myCalendar2" ng-model="eventSources"></div>
+                            <!--  Calendar starts -->
+                            <!--  <div >
+                <div kendo-scheduler k-options="schedulerOptions">
+                    <div k-event-template class="movie-template">
+                        <h5></h5>
+                        <p></p>
+                    </div>
+                </div>
+            </div> -->
+                            <!-- Calendar Ends -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /row-->
+        <style>
+        .custom-event {
+            color: #fff;
+            text-shadow: 0 1px 0 #000;
+        }
+        
+        .custom-all-day-event {
+            text-align: center;
+            text-transform: uppercase
+        }
+        
+        .fc-month-view .fc-event-container {
+            display: none;
+        }
+        </style>
+    </section>
+</aside>
+<script type="text/ng-template" id="addschedulingtaask.html">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{{ diagnosisId.title }} </h4>
+    </div>
+    <div class="modal-body">
+        <select class="form-control" data-ng-model="task" ng-options="obj.title for obj in selectedTasks track by obj._id">
+            <option value="">Select Task</option>
+        </select>
+    </div>
+    <div class="modal-footer">
+        <button type="button" ng-click="addTask()" class="btn btn-primary btn-flat">Add Task</button>
+    </div>
+</script>
+<script type="text/ng-template" id="addschedulingtask.html">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="Cancel()" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">{{ diagnosisId.title }} </h4>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="">
+                    <div class=" table-responsive">
+                        <div ng-show="message" ng-class="alerttype" class="alert alert-dismissable ng-binding ng-hide">
+                            <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button> {{message}} </div>
+                        <form name="apptTypeform" role="form" class="ng-pristine ng-valid">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <select class="form-control" data-ng-model="task" ng-options="obj.title for obj in selectedTasks track by obj._id">
+                                        <option value="">Select Task</option>
+                                    </select>
+                                </div>
+                                <!-- /.box-body -->
+                                <div class="box-footer clearfix no-border">
+                                    <button type="button" ng-disabled="!isEnable" ng-click="addTask()" data-ng-if="task._id" class="btn btn-primary btn-flat">Add Task</button>
+                                </div>
+                            </div>
+                        </form>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<style>
+.form-block {
+    width: 100%;
+    height: 40px;
+    padding-top: 3.2%;
+}
+
+.form-block input {
+    padding-top: 0;
+}
+
+
+/*Datepicker CSS*/
+
+.full button span {
+    background-color: limegreen;
+    border-radius: 32px;
+    color: black;
+}
+
+.partially button span {
+    background-color: orange;
+    border-radius: 32px;
+    color: black;
+}
+</style>
+<script type="text/ng-template" id="eventdetails.html">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="cancel()" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Edit Appointment</h4>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div ng-class="alerttype" ng-show="showmessage" style="margin-right: 1.6%;">
+                <button class="close" aria-hidden="true" data-dismiss="alert" type="button">x</button>
+                {{message}}
+            </div>
+        </div>
+        <div class="row">
+            <form name="myForm" novalidate>
+                <!-- column 1 -->
+                <div class="col-sm-4">
+                    <div class="form-block">
+                        <label>Patient Name</label>
+                    </div>
+                    <div class="form-block" ng-if="data.description.patient.mobile_phone_number">
+                        <label>Patient Primary Phone Number</label>
+                    </div>
+                    <div class="form-block" ng-if="data.description.patient.home_phone_number">
+                        <label>Patient Alternate Phone Number</label>
+                    </div>
+                    <div class="form-block" ng-if="data.description.patient.work_phone_number">
+                        <label>Patient Work Phone Number</label>
+                    </div>
+                    <div class="form-block" ng-if="data.description.patient.email">
+                        <label>Patient Email ID</label>
+                    </div>
+                    <div class="form-block">
+                        <label>Appointment Start Time</label>
+                    </div>
+                    <div class="form-block">
+                        <label>Appointment End Time</label>
+                    </div>
+                    <div class="form-block">
+                        <label>Appointment Date</label>
+                    </div>
+                    <div class="form-block">
+                        <label>Provider</label>
+                    </div>
+                    <div class="form-block">
+                        <label>Diagnosis</label>
+                    </div>
+                    <div class="form-block" ng-if="data.description.referrer">
+                        <label>Referrer</label>
+                    </div>
+                    <div class="form-block">
+                        <label>Created Date</label>
+                    </div>
+                    <div class="form-block">
+                        <label>Created By</label>
+                    </div>
+                    <div class="form-block" ng-if="data.description.last_modified_on">
+                        <label>Modified Date</label>
+                    </div>
+                    <div class="form-block" ng-if="data.description.last_modified_by">
+                        <label>Modified By</label>
+                    </div>
+                    <div class="form-block">
+                        <label>Appointment Id</label>
+                    </div>
+                </div>
+                <!-- column 2 -->
+                <div class="col-sm-4">
+                    <div class="form-block">
+                        {{data.description.patient.first_name}} {{data.description.patient.last_name}}
+                    </div>
+                    <div class="form-block" ng-if="data.description.patient.mobile_phone_number">
+                        {{data.description.patient.mobile_phone_number}}
+                    </div>
+                    <div class="form-block" ng-if="data.description.patient.home_phone_number">
+                        {{data.description.patient.home_phone_number}}
+                    </div>
+                    <div class="form-block" ng-if="data.description.patient.work_phone_number">
+                        {{data.description.patient.work_phone_number}}
+                    </div>
+                    <div class="form-block" ng-if="data.description.patient.email">
+                        {{data.description.patient.email}}
+                    </div>
+                    <div class="form-block">
+                        <select class="form-control" ng-model="formData.appointment" ng-options="obj.start_time for obj in editslottimes track by obj.start_time" data-ng-change="calculateAppointmentTotalTime()">
+                            <option value="" selected></option>
+                        </select>
+                    </div>
+                    <div class="form-block">
+                        <input class="form-control" type="text" ng-readonly="true" value="{{formData.end_time}}"></input>
+                    </div>
+                    <!-- DATEPICKER -->
+                    <div class="form-block">
+                        <p class="input-group">
+                            <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="formData.fromDate" is-open="popup1.opened" datepicker-options="dateOptions" ng-required="true" close-text="Close" alt-input-formats="altInputFormats" />
+                            <span class="input-group-btn">
+                  <button type="button" class="btn btn-default" ng-click="open1()"><i class="glyphicon glyphicon-calendar"></i></button>
+                </span>
+                        </p>
+                    </div>
+                    <div class="form-block">
+                        <select class="form-control" ng-model="formData.provider" ng-options="obj.firstName+' '+obj.lastName for obj in providerData track by obj.firstName">
+                            <option value="" selected></option>
+                        </select>
+                    </div>
+                    <div class="form-block">
+                        {{data.description.diagnosis.title}}
+                    </div>
+                    <div class="form-block" ng-if="data.description.referrer">
+                        {{data.description.referrer.first_name}} {{data.description.referrer.last_name}}
+                    </div>
+                    <div class="form-block">
+                        {{data.description.created_date | date : 'dd-MM-yyyy'}}
+                    </div>
+                    <div class="form-block">
+                        {{data.description.created_by.first_name}} {{data.description.created_by.last_name}}
+                    </div>
+                    <div class="form-block" ng-if="data.description.last_modified_on">
+                        {{data.description.last_modified_on | date : 'dd-MM-yyyy'}}
+                    </div>
+                    <div class="form-block" ng-if="data.description.last_modified_by">
+                        {{data.description.last_modified_by.first_name}} {{data.description.last_modified_by.last_name}}
+                    </div>
+                    <div class="form-block">
+                        {{data.description._id}}
+                    </div>
+                </div>
+                <!-- column 3 -->
+                <!-- popup_dv-->
+                <div class="col-sm-4 ">
+                    <div class="form-block">
+                        <label>Appointment Tasks</label>
+                    </div>
+                    <div class="clearfix">
+                        <table class="table table-striped">
+                            <tr>
+                                <th width="10%">Action</th>
+                                <th width="24%" class="tx-cen">Task</th>
+                                <th width="25%" class="tx-cen">ETA Time(min)</th>
+                            </tr>
+                            <tr class="tblscheduling" ng-repeat="task in data.description.appointment_tasks">
+                                <td>
+                                    <button class="btn btn-danger" ng-click="removeTask(task , $index)"><i class="glyphicon glyphicon-minus"></i></button>
+                                </td>
+                                <td class="tx-cen">{{task.title}}</td>
+                                <td>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control etaclass" ng-model="task.time" ng-blur="calculateAppointmentTotalTime()" valid-number/>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="tx-cen" style="padding-top: 5%">Total Time</td>
+                                <td>
+                                    <div class="">
+                                        <input type="text" class="form-control etaclass1" readonly="readonly" value="{{formData.totalTime | number:2 }}" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="tblscheduling1">
+                                <td colspan="3">
+                                    <label style="">Add Task</label>
+                                    <button style="margin-left: 21%;" type="button" data-toggle="modal" ng-click="addTask()" class="btn btn-primary btn-flat bt-ft"><i class="glyphicon glyphicon-plus"></i></button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="form-block">
+                        <label>Mark as Patient No-Show:</label>
+                        <input type="checkbox" ng-model="formData.noshow" style="margin-left: 15px; margin-top: 1.1%;
+                        " />
+                    </div>
+                    <div class="form-block">
+                        <button class="btn btn-primary" type="submit" ng-click="submit(formData)" style="margin-left: 25%;">Update Appt</button>
+                        <button class="btn btn-danger" type="button" ng-click="deleteAppointment()">Delete Appt</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</script>
+<script type="text/ng-template" id="manageroverride.html">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" ng-click="Cancel()" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" ng-if="data.listOfFailedConstraints[0].code != '1337'">Manager Override Option </h4>
+        <h4 class="modal-title" ng-if="data.listOfFailedConstraints[0].code == '1337'">Unavailable Slot</h4>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-xs-12" ng-if="data.listOfFailedConstraints[0].code != '1337'">
+                <!-- {{data.listOfFailedConstraints}} -->
+                <div>
+                    <p>The following constraints are being violated while setting this appointment: </p>
+                </div>
+                <div>
+                    <ul>
+                        <li ng-repeat="constraint in data.listOfFailedConstraints">{{constraint.constraint}}
+                    </ul>
+                </div>
+                <div ng-if="isEditGrid">
+                    Would you like a manager to approve the appointment?
+                </div>
+                <div ng-if="isEditGrid">
+                    <button class="btn btn-success" ng-click="yes()">Yes</button>
+                    <button class="btn btn-danger" ng-click="no()">No</button>
+                </div>
+                <div ng-if="!isEditGrid">
+                    <p>You don't have permission to book this appointment. Please contact your supervisor.
+                    </p>
+                </div>
+                <div ng-if="!isEditGrid">
+                    <button class="btn btn-success" ng-click="cancel()">Cancel</button>
+                </div>
+            </div>
+            <div class="col-xs-12" ng-if="data.listOfFailedConstraints[0].code == '1337'">
+                <!-- {{data.listOfFailedConstraints}} -->
+                <div>
+                    <p>No Appointments can be booked on this slot currently , please select any other slot for this appointment</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" ng-click="cancel()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<!-- AdminLTE App -->

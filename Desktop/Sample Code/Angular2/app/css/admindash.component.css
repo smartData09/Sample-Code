@@ -1,0 +1,41 @@
+.adminContainer {
+    background-image: url("./app/images/background-1.jpg");
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+.contentContainer {
+	background: rgba(0, 0, 0, 0.81);
+	/*height: 50px;*/
+	width: 90%;
+	margin: 20px auto;
+	padding-top: 20px;
+}
+.jumbotron-heading {
+	/*width: 80%;*/
+	/*border: 2px solid red;*/
+}
+
+.jumbotron-heading h1 {
+	text-align: center;
+    padding: 80px;
+    background: rgba(230, 227, 227, 0.15);
+    margin: 0 20px;
+    margin-bottom: 20px;
+    color: white;
+    text-shadow: 0 0 15px #6d856f;
+}
+
+.contentHeader {
+	text-align: center;
+    padding: 10px;
+    background: rgba(230, 227, 227, 0.15);
+    margin: 0 20px;
+    margin-bottom: 20px;
+    color: white;
+    text-shadow: 0 0 15px #6d856f;	
+}

@@ -1,0 +1,37 @@
+* {
+	margin: 0; padding: 0;
+}
+
+body {
+	font-family: Verdana, sans-serif;
+}
+
+html{
+    min-height:100%;/* make sure it is at least as tall as the viewport */
+    position:relative;
+}
+
+
+/*.card {
+	margin-top: .75rem;
+}
+
+a:hover .fa-heart {
+	color: #cc0000;
+}
+
+table th, table tr td {
+	text-align: center;
+	width: 25%;
+}
+
+.alert {
+	z-index: 999;
+	position: fixed;
+	bottom: 15px;
+	left: 25%;
+	width: 50%;
+	opacity: 0.9;
+}
+
+*/
