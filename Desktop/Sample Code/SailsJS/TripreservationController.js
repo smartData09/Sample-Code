@@ -9,15 +9,10 @@ var TripreservationController = {
 	get_trip_list: function(req, res, next) {
 		var request = req.body;
 		var staff = req.staff;
-		//console.log("Staff is " ,request);
-		//console.log("Start Date is " , request.start , "endDate" , request.end );
 		var moment = require("moment");
 		var today = new Date();
-
 		var datestring = moment(today).format('YYYY-MM-DD');
-		// var datestring = today.toISOString().substring(0, 10);
 		var todayMoment = new moment(datestring, "YYYY-MM-DD");
-		// console.log("Date String", datestring, todayMoment.toDate());
 
 		if (typeof request.start !== "undefined" && typeof request.endday !== "undefined") {
 			var selectedDay = new moment(request.start, "YYYY/MM/DD");
@@ -26,8 +21,6 @@ var TripreservationController = {
 			var nextDay = nextDay1.add(86399, 'seconds');
 		} else {
 
-			// datestring = "2015-09-18"  ; //datestring.toString();
-			//console.log(datestring);
 			var timeTOAdd = 86399 /*+ 86400*/ ;
 			var selectedDay = new moment(datestring, "YYYY-MM-DD");
 			var nextDay1 = new moment(datestring, "YYYY-MM-DD");
@@ -65,12 +58,9 @@ var TripreservationController = {
 			}
 		};
 		query.trip_type = "Reservation";
-		//condtion to select non deleted trips only.
 		query.is_deleted = {
 			'!': true
 		};
-		//console.log("Query", query);
-		// console.log("Query", query, "Se", selectedDay.toDate(), nextDay.toDate(), nextDay1.toDate(), request);
 		//add date filter in case of date range is selected
 		Tripreservation.find(query)
 			.populate('payment')
@@ -130,10 +120,7 @@ var TripreservationController = {
 					if (op.pickup_time) op.pickup_time = getTime(op.pickup_time);
 					if (op.dropoff_time) op.dropoff_time = getTime(op.dropoff_time);
 					if (op.pickup_date) op.pickup_date = moment(op.pickup_date).format("MM/DD/YYYY");
-					// console.log("\n\n\n Trips[i]",Trips[i].trip_type ,"==" , Trips[i].service_type, todayMoment.toDate(), "==", selectedDay.toDate(), Trips[i].flight_number, nextDayClone.toDate());
-					// console.log("Flight is not coming ", Trips[i].conf_id, todayMoment.isSame(selectedDay), nextDayClone.toDate(), todayMoment.toDate(), "==", selectedDay.toDate(), todayMoment.toDate() == selectedDay.toDate())
 					if (Trips[i].trip_type == "Reservation" && Trips[i].service_type == "From Airport" && Trips[i].flight_number && Trips[i].airline && (todayMoment.isSame(selectedDay) && nextDayClone.toDate())) {
-						// console.log("Here");
 						flightTrips.push(op);
 					}
 
@@ -145,7 +132,6 @@ var TripreservationController = {
 							Trips[i].trip_status == "Loaded"
 							/*||i< 100*/
 						)) {
-						// console.log(   "address" ,  encodeURIComponent(Trips[i].pickup_address) );
 						onRouteTrips.push(op);
 					}
 					output.push(op);
@@ -153,7 +139,6 @@ var TripreservationController = {
 
 				}
 
-				// console.log("On Route Trips " ,onRouteTrips) ; 
 				etaService.calculateEta(onRouteTrips, output, function(error, output) {
 
 					tripReservationService.getinvitationDriver(output, tripIds, function(error, output) {
@@ -174,8 +159,6 @@ var TripreservationController = {
 														if (output[i].driver_id == driverData[j].id) {
 															output[i].driver_id = driverData[j];
 															output[i].driver_name = driverData[j].nick_name ? driverData[j].nick_name : driverData[j].first_name + " " + driverData[j].last_name;
-															// console.log("Here Driver DetailC >>>" , output[i].conf_id , " " ,  output[i].driver_id.id , "output[j].driver_name" , output[j].driver_name ) ; 
-
 															//calculate FOT Share if any 
 															if (driverData[j].type == "A" || driverData[j].type == "D") {
 																if (output[i].payment[0] && driverData[j].driver_percentage) {
@@ -203,9 +186,6 @@ var TripreservationController = {
 											}
 										}
 									}
-									// console.log("+++Flight Trip Length is " , flightTrips.length) ; 
-									//output = fieldSort(output, ["driver_name", "sort_time"]);
-									//console.log("Here >>>output in", output);
 									if (flightTrips.length) {
 										// console.log("Here135");
 										var dateString = todayMoment.format('YYYYMMDD');
@@ -219,11 +199,9 @@ var TripreservationController = {
 								});
 
 						} else {
-							// console.log("+++Flight Trip Length is " , flightTrips.length) ; 
-							//output = fieldSort(output, ["driver_name", "sort_time"]);
-							//console.log("Here >>>output out", output);
+
 							if (flightTrips.length) {
-								// console.log("Here12345");
+
 								var dateString = todayMoment.format('YYYYMMDD');
 								flightsData.flightsEta(flightTrips, dateString, function(error, flightResposne) {
 									return res.json(output);
@@ -247,7 +225,6 @@ var TripreservationController = {
 		}
 
 		Tripreservation.findOne(id).exec(function(error, tripInfo) {
-			//console.log("tripInfo", tripInfo);
 			if (error) {
 				return res.json({
 					"error": error
@@ -292,15 +269,6 @@ var TripreservationController = {
 				})
 			}
 
-			// if(tripInfo.driver_id && typeof tripInfo.driver_id =="object"){
-			// 	if(typeof tripInfo.driver_id.lat !=="undefined" && tripInfo.driver_id.lng !=="undefined" ){
-			// 		op.push({
-			// 			"type": "driver",
-			// 			"lat": tripInfo.driver_id.lat,
-			// 			"lng": tripInfo.driver_id.lng
-			// 		})
-			// 	}
-			// }	
 
 			if (tripInfo.driver_id) {
 
@@ -323,9 +291,7 @@ var TripreservationController = {
 						}
 
 						if (driver.fleet) {
-
 							if (driver.fleet.vehicle_type) {
-
 
 								Vehicletype.findOne({
 									id: driver.fleet.vehicle_type
@@ -391,12 +357,10 @@ var TripreservationController = {
 	trip_update: function(req, res) {
 		var id = req.params.trip_id;
 		var data = _.pick(req.body, 'customer_discussion_notes');
-		//console.log(req.params);
-		//console.log(req.body);
+
 		Tripreservation.update({
 			"id": id
 		}, data).exec(function(error, logs) {
-			//console.log(error);
 			if (error)
 				return res.status(400).json({
 					"error": error
@@ -409,9 +373,7 @@ var TripreservationController = {
 		var fs = require('fs');
 		var validator = require('validator');
 		var moment = require("moment");
-		// console.log(" Account Id is ", req.body, "==", req.param('account_id'));
 		var request = req.body; //  _.pick(req.body , "account_id" , )
-		//console.log(request);
 		// payment_method
 		if (!request.account_id) {
 			return res.status(400).json({
@@ -445,7 +407,6 @@ var TripreservationController = {
 
 		req.file('file').upload(function(err, uploadedFiles) {
 			if (err) return res.send(500, err);
-			//console.log(err, uploadedFiles.length);
 
 			if (uploadedFiles.length /*typeof uploadedFiles !=="undefined"*/ ) {
 
@@ -463,8 +424,6 @@ var TripreservationController = {
 							"vehicle_type": true
 						}).exec(function(err, vt) {
 
-							//your code here 
-							//console.log("VT ", vt);
 							//validate and create Trips from here 
 
 							var TripArray = [];
@@ -510,15 +469,6 @@ var TripreservationController = {
 
 
 									result[i].stop_address = [];
-									// if (result[i].routing_type !== "") {
-									// 	result[i].stop_address.push({
-									// 		"type": result[i].routing_type || null,
-									// 		"address": result[i].routing_address || null,
-									// 		"lat": result[i].routing_address_lat || null,
-									// 		"lng": result[i].routing_address_long || null
-									// 	})
-
-									// }
 
 									var payment = {};
 									payment = {
@@ -531,11 +481,6 @@ var TripreservationController = {
 											"payment_profile_id": request.payment_profile_id || null,
 
 											"base_rate": result[i].base_rate || 0,
-											// "hourly_unit": result[i].hourly_unit || 0,
-											// "hourly_price": result[i].hourly_price || 0,
-											// "stop_charges": result[i].stop_charges || 0,
-											// "early_fee": result[i].early_fee || 0,
-											// "holiday_surcharge": result[i].holiday_surcharge || 0,
 											"discount_percentage": result[i].discount_percentage || 0,
 											// "discount_dollar": result[i].discount_dollar || 0,
 											"gratuity_percentage": result[i].gratuity_percentage || 0,
@@ -675,9 +620,6 @@ var TripreservationController = {
 		var type = request.type;
 		var tripId = request.trip_id;
 		var driverId = request.driver_id;
-		//console.log("type********",type);
-		//console.log("tripId********",tripId);
-		//console.log("driverId********",driverId);
 		if (!type) {
 			return res.status(400).json({
 				"error": "type is not defined"
@@ -728,7 +670,6 @@ var TripreservationController = {
 								});
 							}
 							var obj = _.pick(request, "base_rate", "hourly", "extra_stops", "wait_time", "early_late_fee", "greet_meet", "holiday_surcharge", "discount_percentage", "discount_percentage", "discount_dollar", "gratuity_percentage", "gratuity_dollar", "booster_seat", "forward_seat", "rear_seat", "other_amount", "other_costs");
-							//console.log(obj);
 							obj.reservation_amount = Number(request.reservation_total);
 							obj.trip_amount = Number(request.trip_amount);
 							obj.driver_id = trip.driver_id;
@@ -790,7 +731,6 @@ var TripreservationController = {
 				.populate('driver_share')
 				.populate('payment')
 				.exec(function(error, reservation) {
-					// console.log("Reservation >>>>" , reservation );
 					if (error || !reservation) {
 						return res.status(400).json({
 							"error": "Trip not found"
@@ -866,10 +806,7 @@ var TripreservationController = {
 								})
 							}
 						}
-						/*else{
-											// No Invoice is generated yet just unsettle it 
 
-										}*/
 						reservation.settle_status = false;
 						reservation.save();
 						return res.json(reservation);
@@ -1016,8 +953,6 @@ var TripreservationController = {
 	updatedispatchstatus: function(req, res, next) {
 		var status = req.body.dispatch_status;
 		var id = req.body.trip_id;
-		//console.log("status", status);
-		//console.log(req.body);
 		Tripreservation.update({
 			id: id
 		}, {
@@ -1033,7 +968,6 @@ var TripreservationController = {
 						id: id,
 						dispatch_status: status
 					}
-					//console.log("+++++++++TEST+++++++++++", socketData)
 				sails.sockets.blast('UpdateDispatchStatus', socketData);
 				return res.status(200).json({
 					"status_code": "200",
@@ -1052,8 +986,6 @@ var TripreservationController = {
 	updatetripstatus: function(req, res, next) {
 		var status = req.body.trip_status;
 		var id = req.body.trip_id;
-		// console.log("===============>>status", status);
-		// console.log("================>>>>>>>trip status", req.body);
 		Tripreservation.findOne({
 			id: id
 		}).exec(function(error, trip) {
@@ -1126,7 +1058,6 @@ var TripreservationController = {
 						id: id,
 						trip_status: status
 					}
-					// console.log("+++++++++TESTTripStatus+++++++++++", socketData)
 				sails.sockets.blast('UpdateTripStatus', socketData);
 				return res.status(200).json({
 					"status_code": "200",
@@ -1146,15 +1077,12 @@ var TripreservationController = {
 	updatetriptype: function(req, res, next) {
 		var status = req.body.trip_for;
 		var id = req.body.trip_id;
-		// console.log("*****>>status", status);
-		// console.log("*********trip type", req.body);
 		Tripreservation.update({
 			id: id
 		}, {
 			trip_for: status
 		}).exec(function(err, data) {
 			if (err) {
-				//console.log("error", err);
 				return res.status(400).json({
 					"error": "error while updating trip type "
 				});
@@ -1163,14 +1091,12 @@ var TripreservationController = {
 						id: id,
 						trip_for: status
 					}
-					//console.log("+++++++++TESTTripType+++++++++++", socketData)
 				sails.sockets.blast('UpdateTripType', socketData);
 				return res.status(200).json({
 					"status_code": "200",
 					"message": 'success',
 					"userdetails": data
 				});
-				//console.log("msg success ", data);
 				return res.status(200).json({
 					"msg": "trip type updated successfully "
 				});
@@ -1307,8 +1233,6 @@ var TripreservationController = {
 			var nextDayClone = new moment(nextDay1);
 			var nextDay = nextDay1.add(86399, 'seconds');
 		} else {
-			// datestring = "2015-09-18"  ; //datestring.toString();
-			// console.log(datestring);
 			var timeTOAdd = 86399 /*+ 86400*/ ;
 			var selectedDay = new moment(datestring, "YYYY-MM-DD");
 			var nextDay1 = new moment(datestring, "YYYY-MM-DD");
@@ -1328,8 +1252,6 @@ var TripreservationController = {
 		query.is_deleted = {
 			'!': true
 		};
-		// console.log("Query", query, "Se", selectedDay.toDate(), nextDay.toDate(), nextDay1.toDate(), request);
-		//add date filter in case of date range is selected
 		Tripreservation.find(query)
 			.populate('payment')
 			.populate('customer_id')
@@ -1358,9 +1280,7 @@ var TripreservationController = {
 	},
 	managepagination: function(req, res) {
 		var data = req.body || {};
-		// console.log("data*******************", data);
 		var skipNo = (req.body.page - 1) * req.body.count;
-		// console.log("++++++++++++", skipNo);
 		var query = {};
 		query.trip_type = "Quote";
 		query.is_deleted = {
@@ -1398,7 +1318,6 @@ var TripreservationController = {
 							if (op.pickup_date) op.pickup_date = moment(op.pickup_date).format("MM/DD/YYYY");
 							output.push(op);
 						}
-						// console.log("*****************",output);
 						return res.json({
 							'data': output,
 							'total': tripsCount
@@ -1436,9 +1355,7 @@ var TripreservationController = {
 			count = req.body.count || 50;
 		var skipNo = (page - 1) * count;
 		var search = req.body.search || "";
-		//console.log('search', search);
 		var query = {};
-		//var count = 50;
 
 		query.is_deleted = true;
 
@@ -1473,7 +1390,6 @@ var TripreservationController = {
 									trip.pickup_time = getTime(trip.pickup_time);
 									console.log("trip *********", trip.pickup_time);
 								})
-								//console.log('customers', customers);
 							return res.jsonx({
 								success: true,
 								data: {
